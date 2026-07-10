@@ -7,6 +7,8 @@
 <script src="https://cdn.jsdelivr.net/npm/marked@12/marked.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/dompurify@3/dist/purify.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/vditor@3/dist/index.css">
+<script src="https://cdn.jsdelivr.net/npm/vditor@3/dist/index.min.js"></script>
 <style>
   :root {
     --amber: #d97706; --amber-bg: #fef3c7; --amber-bg-strong: #fde68a;
@@ -484,28 +486,46 @@ function connectSSE() {
 let editing = false;
 const editBtn = $('#edit-btn'), saveBtn = $('#save-btn'), cancelBtn = $('#cancel-btn');
 
+let vditor = null;
 async function enterEdit() {
   const {markdown} = await api('/api/doc');
   editing = true;
   clearMarks();
-  const ta = document.createElement('textarea');
-  ta.id = 'editor';
-  ta.value = markdown;
-  $('#doc').innerHTML = '';
-  $('#doc').appendChild(ta);
   editBtn.style.display = 'none';
   saveBtn.style.display = cancelBtn.style.display = '';
   $('#panel').style.visibility = 'hidden';
   while (svg.firstChild) svg.removeChild(svg.firstChild);
-  ta.focus();
+  const doc = $('#doc');
+  if (window.Vditor) {
+    // WYSIWYG: stay rendered while editing (same engine as vscode-office)
+    doc.innerHTML = '<div id="editor-host"></div>';
+    vditor = new Vditor('editor-host', {
+      mode: 'wysiwyg',
+      value: markdown,
+      cache: {enable: false},
+      height: Math.max(innerHeight - 170, 400),
+      toolbar: ['headings', 'bold', 'italic', 'strike', '|', 'list', 'ordered-list', 'check', '|',
+                'quote', 'code', 'inline-code', 'link', 'table', '|', 'undo', 'redo', 'outline'],
+      preview: {markdown: {toc: false}},
+    });
+  } else {
+    // fallback: raw markdown editor
+    const ta = document.createElement('textarea');
+    ta.id = 'editor';
+    ta.value = markdown;
+    doc.innerHTML = '';
+    doc.appendChild(ta);
+    ta.focus();
+  }
 }
 
 async function exitEdit(save) {
   if (save) {
-    const md = $('#editor').value;
+    const md = vditor ? vditor.getValue() : $('#editor').value;
     try { await api('/api/doc', {markdown: md}); toast('Saved'); }
     catch (err) { toast('Save failed: ' + err.message); return; }
   }
+  if (vditor) { try { vditor.destroy(); } catch (e) {} vditor = null; }
   editing = false;
   editBtn.style.display = '';
   saveBtn.style.display = cancelBtn.style.display = 'none';
