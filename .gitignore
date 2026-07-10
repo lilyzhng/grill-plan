@@ -1,0 +1,4 @@
+sessions/
+__pycache__/
+.DS_Store
+*.threads.json
