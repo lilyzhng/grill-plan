@@ -4,8 +4,6 @@
 
 It reads your markdown doc and pins sharp first-principle questions to the exact sentences it challenges. You reply in threads next to the text, Google-Docs style. Threads resolve, the plan aligns, then you build.
 
-No accounts, no cloud, no dependencies. One Python file, one HTML file, one JSON file.
-
 ```
 ┌─ TOC ──┬───────── your doc ─────────┬──── margin threads ────┐
 │ 1. …   │  …conducting ⟨at least one │  ● Grill 1             │
@@ -73,26 +71,6 @@ The UI is the surface; the method is the point:
 3. **Anchored, not abstract.** Each question pins to the exact sentence it challenges.
 4. **Resolve or it didn't happen.** A thread ends with a resolution written back into the plan,
    not with a vibe.
-
-## API
-
-| Route | Method | Body |
-|---|---|---|
-| `/api/doc` | GET | markdown + title |
-| `/api/doc` | POST | `{markdown}` (edit mode save) |
-| `/api/threads` | GET | full store |
-| `/api/threads` | POST | `{anchor, author, text, label?}` |
-| `/api/comment` | POST | `{thread_id, author, text}` |
-| `/api/resolve` | POST | `{thread_id, status: open\|resolved}` |
-| `/api/events` | GET | SSE; fires on any mutation, including external file edits |
-
-Doc-relative assets (images, linked HTML) are served from the doc's directory, path-traversal guarded.
-
-## Tests
-
-```bash
-python3 -m unittest tests.test_grill_plan -v
-```
 
 ## License
 
