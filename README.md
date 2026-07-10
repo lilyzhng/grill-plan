@@ -4,15 +4,7 @@
 
 It reads your markdown doc and pins sharp first-principle questions to the exact sentences it challenges. You reply in threads next to the text, Google-Docs style. Threads resolve, the plan aligns, then you build.
 
-```
-┌─ TOC ──┬───────── your doc ─────────┬──── margin threads ────┐
-│ 1. …   │  …conducting ⟨at least one │  ● Grill 1             │
-│ 2. …   │  independent review per    │  Agent: What source    │
-│ 3. …   │  workstream⟩ that does…----│  qualifies as          │
-│        │                            │  independent here?     │
-│        │                            │  You: [reply box]      │
-└────────┴────────────────────────────┴────────────────────────┘
-```
+![grill-plan: agent questions pinned to a design doc, answered in margin threads](docs/super_mario_bench.png)
 
 ## How it works
 
