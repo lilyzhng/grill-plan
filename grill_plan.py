@@ -197,7 +197,8 @@ def make_handler(store, doc_path):
             elif self.path == "/api/doc":
                 md = Path(doc_path).read_text()
                 title = next((l.lstrip("# ").strip() for l in md.splitlines() if l.startswith("# ")), Path(doc_path).name)
-                self.send_json({"markdown": md, "title": title, "path": str(doc_path)})
+                self.send_json({"markdown": md, "title": title, "path": str(doc_path),
+                                "mtime": Path(doc_path).stat().st_mtime})
             elif self.path == "/api/threads":
                 self.send_json(store.snapshot())
             elif self.path == "/api/events":
@@ -248,6 +249,10 @@ def make_handler(store, doc_path):
                     md = body.get("markdown")
                     if not isinstance(md, str) or not md.strip():
                         raise ValueError("non-empty markdown required")
+                    base = body.get("base_mtime")
+                    if base is not None and abs(Path(doc_path).stat().st_mtime - float(base)) > 1e-6:
+                        self.send_json({"error": "doc changed on disk since you started editing", "conflict": True}, 409)
+                        return
                     Path(doc_path).write_text(md)
                     store.broadcast("doc")
                     self.send_json({"ok": True})
